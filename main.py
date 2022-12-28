@@ -118,7 +118,11 @@ async def get_link(event):
         is_multiple, channel_id, ids = scrap_link(event.raw_text)
 
         if channel_id:
-            channel_entity = await temp_cli.get_entity(int(channel_id))
+            try:
+                channel_entity = await temp_cli.get_entity(int(channel_id))
+            except:
+                event.reply("Error. Please Check the link")
+                temp_cli.disconnect()
             if is_multiple:
                 files = await temp_cli.get_messages(channel_entity, ids=ids)
                 for file in files:
