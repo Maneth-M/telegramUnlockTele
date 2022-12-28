@@ -112,29 +112,6 @@ async def get_link(event):
         except:
             return False
 
-    async def download_upload_photo(file, temp_cli, msg, event, progress_bar=progress_bar, ):
-        try:
-            with open(f"media/{file.media.photo.id}", "wb") as out:
-                await download_file(temp_cli, file.media.photo, out, progress_callback=progress_bar)
-
-            await msg.edit("Finished downloading. Sending Now")
-
-            with open(f"media/{file.media.photo.id}", "rb") as out:
-                res = await upload_file(client, out, progress_callback=progress_bar)
-
-                media = types.InputMediaUploadedDocument(
-                    file=res,
-                    mime_type=file.media.photo.mime_type,
-                    attributes=(file.media.photo.attributes),
-                    # not needed for most files, thumb=thumb,
-                    force_file=False
-                )
-                await event.reply(file=media)
-                await msg.edit("Finished uploading")
-                return True
-        except:
-            return False
-
     temp_cli = TelegramClient(f"sessions/{event.peer_id.user_id}", Config.api_id, Config.api_hash)
     await temp_cli.connect()
     if await temp_cli.is_user_authorized():
@@ -148,28 +125,30 @@ async def get_link(event):
                     try:
                         print(file.media.photo)
                         msg = await event.reply("Downloading Started")
-                        if not await download_upload_photo(file=file, temp_cli=temp_cli, msg=msg, event=event):
-                            await msg.edit("Error")
+                        await file.download_media(f"media/{file.media.photo.id}")
+                        msg.edit("Finished Downloading. Uploading Now")
+                        await client.send_message(event.peer_id.user_id, f"media/{file.media.photo.id}")
                         os.remove(f"media/{file.media.photo.id}")
                     except:
                         print(file.media.document)
                         msg = await event.reply("Downloading Started")
-                        if not await download_upload_photo(file=file, temp_cli=temp_cli, msg=msg, event=event):
-                            msg.edit("Error")
+                        if not await download_upload_video(file=file, temp_cli=temp_cli, msg=msg, event=event):
+                            await msg.edit("Error")
                         os.remove(f"media/{file.media.document.id}")
             else:
                 file = await temp_cli.get_messages(channel_entity, ids=ids)
                 try:
                     print(file.media.photo)
                     msg = await event.reply("Downloading Started")
-                    if not await download_upload_photo(file=file, temp_cli=temp_cli, msg=msg, event=event):
-                        await msg.edit("Error")
+                    await file.download_media(f"media/{file.media.photo.id}")
+                    msg.edit("Finished Downloading. Uploading Now")
+                    await client.send_message(event.peer_id.user_id, f"media/{file.media.photo.id}")
                     os.remove(f"media/{file.media.photo.id}")
                 except:
                     print(file.media.document)
                     msg = await event.reply("Downloading Started")
-                    if not await download_upload_photo(file=file, temp_cli=temp_cli, msg=msg, event=event):
-                        msg.edit("Error")
+                    if not await download_upload_video(file=file, temp_cli=temp_cli, msg=msg, event=event):
+                        await msg.edit("Error")
                     os.remove(f"media/{file.media.document.id}")
                 # print(types.Photo)
 
