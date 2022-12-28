@@ -108,27 +108,28 @@ async def get_link(event):
 
                 await msg.edit("Finished downloading. Sending Now")
 
-                with open(f"media/{file.media.document.id}", "rb") as out:
-                    res = await upload_file(client, out, progress_callback=progress_bar)
-                    # result is InputFile()
-                    # you can add more data to it
-                    attributes, mime_type = utils.get_attributes(
-                        f"media/{file.media.document.id}",
-                    )
-                    media = types.InputMediaUploadedDocument(
-                        file=res,
-                        mime_type=mime_type,
-                        attributes=attributes,
-                        # not needed for most files, thumb=thumb,
-                        force_file=False
-                    )
-                    await msg.edit("Finished uploading")
-                    await event.reply(file=media)
-                    # or just send it as it is
-                    await event.reply(file=res)
-
-                    # await client.send_file(event.peer_id.user_id, file)
-                    os.remove(f"media/{file.media.document.id}")
+                # with open(f"media/{file.media.document.id}", "rb") as out:
+                #     res = await upload_file(client, out, progress_callback=progress_bar)
+                #     # result is InputFile()
+                #     # you can add more data to it
+                #     attributes, mime_type = utils.get_attributes(
+                #         f"media/{file.media.document.id}",
+                #     )
+                #     media = types.InputMediaUploadedDocument(
+                #         file=res,
+                #         mime_type=mime_type,
+                #         attributes=attributes,
+                #         # not needed for most files, thumb=thumb,
+                #         force_file=False
+                #     )
+                #     await msg.edit("Finished uploading")
+                #     await event.reply(file=media)
+                #     # or just send it as it is
+                #     await event.reply(file=res)
+                #
+                #     # await client.send_file(event.peer_id.user_id, file)
+                await client.send_file(f"media/{file.media.document.id}")
+                os.remove(f"media/{file.media.document.id}")
         else:
             await event.reply("Error. Please Check your link again")
 
