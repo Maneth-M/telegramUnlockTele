@@ -177,7 +177,7 @@ def scrap_link(txt):
             if i[-1]== "/":
                 i = i[:len(i)-1]
             i = i.split("/")
-            if "-" in i[1]:
+            if "-" in i[-1]:
                 is_multiple = True
                 ids = i[-1].split("-")
                 ids = [eval(i) for i in ids]
