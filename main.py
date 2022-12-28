@@ -83,34 +83,8 @@ async def get_code(event):
 
 @client.on(events.NewMessage(pattern="https://t.me"))
 async def get_link(event):
-    timer = Timer()
-    msg = ""
-    async def progress_bar(current, total, type_of="Progress - "):
-        if timer.can_send():
-            await msg.edit("{} {}%".format(type_of, round(current * 100 / total)))
-
-    async def download_upload_video(file, temp_cli, msg, event, progress_bar=progress_bar, ):
-        try:
-            with open(f"media/{file.media.document.id}", "wb") as out:
-                await download_file(temp_cli, file.media.document, out, progress_callback=progress_bar)
-
-            await msg.edit("Finished downloading. Sending Now")
-
-            with open(f"media/{file.media.document.id}", "rb") as out:
-                res = await upload_file(client, out, progress_callback=progress_bar)
-
-                media = types.InputMediaUploadedDocument(
-                    file=res,
-                    mime_type=file.media.document.mime_type,
-                    attributes=(file.media.document.attributes),
-                    # not needed for most files, thumb=thumb,
-                    force_file=False
-                )
-                await event.reply(file=media)
-                await msg.edit("Finished uploading")
-                return True
-        except:
-            return False
+    async def progress_bar(a, b):
+        await msg.edit(f"Progress - {round(a * 100 / b)}%")
 
     temp_cli = TelegramClient(f"sessions/{event.peer_id.user_id}", Config.api_id, Config.api_hash)
     await temp_cli.connect()
@@ -126,36 +100,27 @@ async def get_link(event):
                 return
             if is_multiple:
                 files = await temp_cli.get_messages(channel_entity, ids=ids)
+
                 for file in files:
-                    try:
-                        print(file.media.photo)
-                        msg = await event.reply("Downloading Started")
-                        file = await file.download_media(f"media")
-                        await msg.edit("Finished Downloading. Uploading Now")
-                        await client.send_file(event.peer_id.user_id, file)
-                        os.remove(file)
-                    except:
-                        print(file.media.document)
-                        msg = await event.reply("Downloading Started")
-                        if not await download_upload_video(file=file, temp_cli=temp_cli, msg=msg, event=event):
-                            await msg.edit("Error")
-                        os.remove(f"media/{file.media.document.id}")
+                    if file.media:
+                        try:
+                            msg = await event.reply("Downloading Started")
+                            file = await file.download_media(f"media", progress_callback=progress_bar)
+                            await msg.edit("Finished Downloading. Uploading Now")
+                            await client.send_file(event.peer_id.user_id, file, progress_callback=progress_bar)
+                            os.remove(file)
+                        except:
+                            await event.reply("Error")
             else:
                 file = await temp_cli.get_messages(channel_entity, ids=ids)
                 try:
-                    print(file.media.photo)
                     msg = await event.reply("Downloading Started")
-                    file = await file.download_media(f"media")
+                    file = await file.download_media(f"media", progress_callback=progress_bar)
                     await msg.edit("Finished Downloading. Uploading Now")
-                    await client.send_file(event.peer_id.user_id, file)
+                    await client.send_file(event.peer_id.user_id, file, progress_callback=progress_bar)
                     os.remove(file)
                 except:
-                    print(file.media.document)
-                    msg = await event.reply("Downloading Started")
-                    if not await download_upload_video(file=file, temp_cli=temp_cli, msg=msg, event=event):
-                        await msg.edit("Error")
-                    os.remove(f"media/{file.media.document.id}")
-                # print(types.Photo)
+                    await event.reply("Error")
 
         else:
             await event.reply("Error. Please Check your link again")
