@@ -125,10 +125,10 @@ async def get_link(event):
                     try:
                         print(file.media.photo)
                         msg = await event.reply("Downloading Started")
-                        await file.download_media(f"media/{file.media.photo.id}")
+                        file = await file.download_media(f"media")
                         msg.edit("Finished Downloading. Uploading Now")
-                        await client.send_message(event.peer_id.user_id, f"media/{file.media.photo.id}")
-                        os.remove(f"media/{file.media.photo.id}")
+                        await client.send_message(event.peer_id.user_id, file)
+                        os.remove(file)
                     except:
                         print(file.media.document)
                         msg = await event.reply("Downloading Started")
@@ -140,10 +140,10 @@ async def get_link(event):
                 try:
                     print(file.media.photo)
                     msg = await event.reply("Downloading Started")
-                    await file.download_media(f"media/{file.media.photo.id}")
+                    file = await file.download_media(f"media")
                     msg.edit("Finished Downloading. Uploading Now")
-                    await client.send_message(event.peer_id.user_id, f"media/{file.media.photo.id}")
-                    os.remove(f"media/{file.media.photo.id}")
+                    await client.send_message(event.peer_id.user_id, file)
+                    os.remove(file)
                 except:
                     print(file.media.document)
                     msg = await event.reply("Downloading Started")
