@@ -145,9 +145,18 @@ async def get_link(event):
             if is_multiple:
                 files = await temp_cli.get_messages(channel_entity, ids=ids)
                 for file in files:
-                    msg = await event.reply("Downloading Started")
-                    await download_upload_video(file=file, temp_cli=temp_cli, msg=msg, event=event)
-                    os.remove(f"media/{file.media.document.id}")
+                    try:
+                        print(file.media.photo)
+                        msg = await event.reply("Downloading Started")
+                        if not await download_upload_photo(file=file, temp_cli=temp_cli, msg=msg, event=event):
+                            await msg.edit("Error")
+                        os.remove(f"media/{file.media.photo.id}")
+                    except:
+                        print(file.media.document)
+                        msg = await event.reply("Downloading Started")
+                        if not await download_upload_photo(file=file, temp_cli=temp_cli, msg=msg, event=event):
+                            msg.edit("Error")
+                        os.remove(f"media/{file.media.document.id}")
             else:
                 file = await temp_cli.get_messages(channel_entity, ids=ids)
                 try:
