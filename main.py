@@ -88,6 +88,30 @@ async def get_link(event):
     async def progress_bar(current, total, type_of="Progress - "):
         if timer.can_send():
             await msg.edit("{} {}%".format(type_of, round(current * 100 / total)))
+
+    async def download_upload(file, temp_cli, msg, event, progress_bar=progress_bar, ):
+        try:
+            with open(f"media/{file.media.document.id}", "wb") as out:
+                await download_file(temp_cli, file.media.document, out, progress_callback=progress_bar)
+
+            await msg.edit("Finished downloading. Sending Now")
+
+            with open(f"media/{file.media.document.id}", "rb") as out:
+                res = await upload_file(client, out, progress_callback=progress_bar)
+
+                media = types.InputMediaUploadedDocument(
+                    file=res,
+                    mime_type=file.media.document.mime_type,
+                    attributes=(file.media.document.attributes),
+                    # not needed for most files, thumb=thumb,
+                    force_file=False
+                )
+                await event.reply(file=media)
+                await msg.edit("Finished uploading")
+                return True
+        except:
+            return False
+
     temp_cli = TelegramClient(f"sessions/{event.peer_id.user_id}", Config.api_id, Config.api_hash)
     await temp_cli.connect()
     if await temp_cli.is_user_authorized():
@@ -100,29 +124,9 @@ async def get_link(event):
             else:
                 file = await temp_cli.get_messages(channel_entity, ids=ids)
                 msg = await event.reply("Downloading Started")
-                with open(f"media/{file.media.document.id}", "wb") as out:
-                    await download_file(temp_cli, file.media.document, out, progress_callback=progress_bar)
-
-                await msg.edit("Finished downloading. Sending Now")
-
-                with open(f"media/{file.media.document.id}", "rb") as out:
-                    res = await upload_file(client, out, progress_callback=progress_bar)
-                    # result is InputFile()
-                    # you can add more data to it
-                    attributes, mime_type = utils.get_attributes(
-                        f"media/{file.media.document.id}",
-                    )
-                    media = types.InputMediaUploadedDocument(
-                        file=res,
-                        mime_type=mime_type,
-                        attributes=(file.media.document.attributes),
-                        # not needed for most files, thumb=thumb,
-                        force_file=False
-                    )
-                    await msg.edit("Finished uploading")
-                    await event.reply(file=media)
-
+                await download_upload(file=file, temp_cli=temp_cli, msg=msg, event=event)
                 os.remove(f"media/{file.media.document.id}")
+
         else:
             await event.reply("Error. Please Check your link again")
 
