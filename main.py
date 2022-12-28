@@ -126,8 +126,8 @@ async def get_link(event):
                         print(file.media.photo)
                         msg = await event.reply("Downloading Started")
                         file = await file.download_media(f"media")
-                        msg.edit("Finished Downloading. Uploading Now")
-                        await client.send_message(event.peer_id.user_id, file)
+                        await msg.edit("Finished Downloading. Uploading Now")
+                        await client.send_file(event.peer_id.user_id, file)
                         os.remove(file)
                     except:
                         print(file.media.document)
@@ -141,8 +141,8 @@ async def get_link(event):
                     print(file.media.photo)
                     msg = await event.reply("Downloading Started")
                     file = await file.download_media(f"media")
-                    msg.edit("Finished Downloading. Uploading Now")
-                    await client.send_message(event.peer_id.user_id, file)
+                    await msg.edit("Finished Downloading. Uploading Now")
+                    await client.send_file(event.peer_id.user_id, file)
                     os.remove(file)
                 except:
                     print(file.media.document)
@@ -151,8 +151,6 @@ async def get_link(event):
                         await msg.edit("Error")
                     os.remove(f"media/{file.media.document.id}")
                 # print(types.Photo)
-
-
 
         else:
             await event.reply("Error. Please Check your link again")
