@@ -100,9 +100,6 @@ async def get_link(event):
             else:
                 file = await temp_cli.get_messages(channel_entity, ids=ids)
                 msg = await event.reply("Downloading Started")
-                print(file)
-                # file = await file.download_media("media")
-                print(type(file))
                 with open(f"media/{file.media.document.id}", "wb") as out:
                     await download_file(temp_cli, file.media.document, out, progress_callback=progress_bar)
 
@@ -128,7 +125,7 @@ async def get_link(event):
                 #     await event.reply(file=res)
                 #
                 #     # await client.send_file(event.peer_id.user_id, file)
-                await client.send_file(f"media/{file.media.document.id}")
+                await client.send_file(event.peer_id.user_id, f"media/{file.media.document.id}")
                 os.remove(f"media/{file.media.document.id}")
         else:
             await event.reply("Error. Please Check your link again")
