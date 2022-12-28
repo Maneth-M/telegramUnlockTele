@@ -115,17 +115,12 @@ async def get_link(event):
                     media = types.InputMediaUploadedDocument(
                         file=res,
                         mime_type=mime_type,
-                        attributes=([types.DocumentAttributeVideo(0,0,0)]),
+                        attributes=(file.media.document.attributes),
                         # not needed for most files, thumb=thumb,
                         force_file=False
                     )
                     await msg.edit("Finished uploading")
                     await event.reply(file=media)
-                    # or just send it as it is
-                    # await event.reply(file=res)
-
-                    # await client.send_file(event.peer_id.user_id, file)
-                # await client.send_file(event.peer_id.user_id, f"media/{file.media.document.id}")
 
                 os.remove(f"media/{file.media.document.id}")
         else:
